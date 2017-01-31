@@ -25,6 +25,7 @@ t_client *initClient(t_core *core, int socket) {
                     tmp = gameInfoClient(core, i);
                     sendOther(core, tmp, my_strlen(tmp), i);
                     free(tmp);
+
                     return (core->game->players[i]);
                 }
             }

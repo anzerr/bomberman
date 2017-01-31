@@ -18,7 +18,7 @@ t_game *initGame(t_core *core) {
     while (i < core->size) {
         x = 0;
         while (x < core->size) {
-            game->map[i][x] = 0;
+            game->map[i][x] = 1;
             x += 1;
         }
         i += 1;
@@ -40,6 +40,35 @@ int createMap(int ***map, int size) {
     }
 
     return (1);
+}
+
+int updateMap(t_core *core, int delta) {
+    int i, x, changes;
+    t_game *game;
+
+    i = 0;
+    changes = 0;
+    game = core->game;
+    while (i < core->size) {
+        x = 0;
+        while (x < core->size) {
+            if (game->map[i][x] == 10) {
+                bombExplode(core, i, x, 3);
+            } else {
+                if (game->map[i][x] - delta >= 1) {
+                    game->map[i][x] -= delta;
+                    changes += 1;
+                }
+                if (game->map[i][x] - 1 >= 1) {
+                    game->map[i][x] -= 1;
+                    changes += 1;
+                }
+            }
+            x += 1;
+        }
+        i += 1;
+    }
+    return (changes);
 }
 
 char *gameInfoClient(t_core *core, int key) {
@@ -128,13 +157,8 @@ void sendGameInfo(t_core *core, int socket) {
     char *info, *map, *client;
     int size;
 
-    put(core, "getting map\n");
     map = gameInfoMap(core);
-    put(core, map);
-    put(core, "\ngetting client\n");
     client = gameInfoClient(core, -1);
-    put(core, client);
-    put(core, "\ngot all map + client\n");
 
     size = my_strlen(map) + my_strlen(client) + 1;
     put(core, "got the size\n");
@@ -152,8 +176,41 @@ void sendGameInfo(t_core *core, int socket) {
 }
 
 void gameAction(t_core *core, int key, char *request) {
-    if (request[0] == 'a') {
+    int code, delta;
+    char *tmp;
 
+    delta = getMs() - core->start;
+    if (delta >= 50) {
+        int delta = updateMap(core, 1);
+        if (delta != 0) {
+            tmp = gameInfoMap(core);
+            sendAll(core, tmp, my_strlen(tmp));
+            free(tmp);
+        }
+        core->start = getMs();
     }
-    write(core->game->players[key]->socket, "KO", 2);
+
+    if (request[0] == 'u') {
+        code = a_playerMoveUp(core, key);
+    }
+    if (request[0] == 'd') {
+        code = a_playerMoveDown(core, key);
+    }
+    if (request[0] == 'l') {
+        code = a_playerMoveLeft(core, key);
+    }
+    if (request[0] == 'r') {
+        code = a_playerMoveRight(core, key);
+    }
+    if (request[0] == 'b') {
+        code = a_playerPlaceBomb(core, key);
+    }
+
+    if (core->game->players[key] != NULL) {
+        if (code) {
+            sendPayload(core->game->players[key]->socket, "OK", 2);
+        } else {
+            sendPayload(core->game->players[key]->socket, "KO", 2);
+        }
+    }
 }

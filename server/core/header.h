@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <stdio.h>
 
 #define MAX_PLAYER 4
 #define REQUEST_SIZE 1024
@@ -49,6 +50,7 @@ typedef struct s_core
   char *logPath;
   int size;
   int logHandle;
+  int start;
   struct s_game *game;
 } t_core;
 
@@ -71,10 +73,22 @@ char *gameInfoClient(t_core *core, int key);
 char *gameInfoMap(t_core *core);
 void sendGameInfo(t_core *core, int socket);
 
+int updateMap(t_core *core, int delta);
+
+void bombExplode(t_core *core, int x, int y, int size);
+
 void sendPayload(int socket, char *payload, int size);
 void sendAll(t_core *core, char *payload, int size);
 void sendOther(t_core *core, char *payload, int size, int key);
 
+int playerMove(t_core *core, int key, int xP, int yP);
+int a_playerMoveUp(t_core *core, int key);
+int a_playerMoveDown(t_core *core, int key);
+int a_playerMoveLeft(t_core *core, int key);
+int a_playerMoveRight(t_core *core, int key);
+int a_playerPlaceBomb(t_core *core, int key);
+
+int getMs();
 int close(int fd);
 
 int my_strlen(char *str);

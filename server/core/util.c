@@ -23,3 +23,14 @@ char *getParam(int argc, char **argv, char *param)
     }
   return (NULL);
 }
+
+int getMs() {
+    struct timeval tv;
+    int msec = -1;
+
+    if (gettimeofday(&tv, NULL) == 0) {
+        msec = ((tv.tv_sec % 86400) * 1000 + tv.tv_usec / 1000);
+    }
+
+    return(msec);
+}

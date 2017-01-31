@@ -1,42 +1,23 @@
-var connect = require('connect');
-var serveStatic = require('serve-static');
-connect().use(serveStatic(__dirname)).listen(1337);
-
 var WebSocketServer = require('ws').Server;
-var wss = new WebSocketServer({ port: 8080 });
+var app = require('express')();
+var http = require('http').Server(app);
 
-wss.on('connection', function connection(ws) {
-    ws.on('message', function incoming(message) {
-        console.log('received: %s', message);
-    });
+var map = new (require('./server/map.js'))();
 
-    ws.send('something');
+app.get('/', function(req, res){
+    res.sendFile(__dirname + '/public/index.html');
 });
 
-/*var a = function () {
-    var s = require('net').Socket();
+var fs = require('fs');
+var WebSocketServer = require('ws').Server;
 
-    s.connect(1337, '127.0.0.1');
+var wss = new WebSocketServer({port: 8080, host: '0.0.0.0'});
+wss.on('connection', function(ws) {
+    if (!map.add(ws)) {
+        ws.close();
+    }
+});
 
-    s.write('cat\r\n', function(e, r) {
-        console.log('send msg', e, r);
-    });
-
-    s.on('data', function(d) {
-        console.log('--', d.toString());
-    });
-
-    s.on('connect', function() {
-        console.log('connected');
-    });
-
-    s.on('close', function() {
-        console.log('closed');
-        setTimeout(a, 5000);
-    });
-
-    s.on('error', function(e) {
-        console.log('e', e);
-    });
-};
-a();*/
+http.listen(3000, function(){
+    console.log('listening on *:3000');
+});

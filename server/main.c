@@ -11,6 +11,7 @@ t_core *initCore(int argc, char **argv) {
     core->debug = (getParam(argc, argv, "-v") != NULL) ? 1 : 0;
     core->logPath = (getParam(argc, argv, "--log")) ? getParam(argc, argv, "--log") : "debug.log";
     core->size = (getParam(argc, argv, "--size")) ? my_getnbr(getParam(argc, argv, "--size")) : 10;
+    core->start = getMs();
 
     if ((game = initGame(core)) == NULL)
         return (NULL);
@@ -75,6 +76,7 @@ int listenClient(t_core *core) {
             if (initClient(core, socket) == NULL) {
                 put(core, "failed to add user\n");
             } else {
+                put(core, "user added into slot\n");
                 sendGameInfo(core, socket);
             }
         }
@@ -102,6 +104,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in servaddr;
 
     srand(time(NULL));
+
     if (getParam(argc, argv, "--port") && (core = initCore(argc, argv)) != NULL) {
         if ((core->sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
              put(core, "ERROR opening socket\n");

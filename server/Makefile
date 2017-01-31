@@ -3,6 +3,8 @@ SRC =	main.c \
 	core/log.c \
 	core/network/client.c \
 	core/network/game.c \
+	core/action/player.c \
+	core/game/bomb.c \
 	../lib/list.c \
 	../lib/memset.c \
 	../lib/my_nbrtostr.c
