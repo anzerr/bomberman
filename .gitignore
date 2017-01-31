@@ -1,5 +1,8 @@
 .idea/
-client/node_modules
-server/softwar.log
+client/web/node_modules
+client/web/node_modules/*
+client/macro/node_modules
+client/macro/node_modules/*
+server/debug.log
 
 *.o
