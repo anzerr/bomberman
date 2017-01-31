@@ -12,3 +12,7 @@ server emit
     l = move left
     r = move right
     b = place bomb
+
+
+TODO: add something that explains server and client
+TODO: doc on how to deploy the web midware/client

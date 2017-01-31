@@ -65,7 +65,6 @@ int getPackage(int socket, char *buffer) {
     if ((size = read(socket, buffer, REQUEST_SIZE)) == 0) {
         return (0);
     } else {
-        buffer[size] = '\0';
         return (size);
     }
 }

@@ -6,7 +6,7 @@ var sleep = function(ms) {
 };
 
 setTimeout(function() {
-    var delay = 20;
+    var delay = 10;
     robot.mouseClick();
     for (var x = 0; x < 10; x++) {
         sleep(delay / 2);

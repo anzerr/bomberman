@@ -18,7 +18,11 @@ t_game *initGame(t_core *core) {
     while (i < core->size) {
         x = 0;
         while (x < core->size) {
-            game->map[i][x] = 1;
+            if (x != 0 || i != 0) {
+                game->map[i][x] = (x % 2 == 0 && i % 2 == 0)? (x % 4 == 0) : 2;
+            } else {
+                game->map[i][x] = 2;
+            }
             x += 1;
         }
         i += 1;
@@ -47,7 +51,7 @@ int updateMap(t_core *core, int delta) {
     t_game *game;
 
     i = 0;
-    changes = 0;
+    changes = 1;
     game = core->game;
     while (i < core->size) {
         x = 0;
@@ -55,11 +59,11 @@ int updateMap(t_core *core, int delta) {
             if (game->map[i][x] == 10) {
                 bombExplode(core, i, x, 3);
             } else {
-                if (game->map[i][x] - delta >= 1) {
+                if (game->map[i][x] - delta >= 2) {
                     game->map[i][x] -= delta;
                     changes += 1;
                 }
-                if (game->map[i][x] - 1 >= 1) {
+                if (game->map[i][x] - 1 >= 2) {
                     game->map[i][x] -= 1;
                     changes += 1;
                 }
@@ -125,7 +129,15 @@ char *gameInfoMap(t_core *core) {
     int size, i, x;
 
     size = 2 + ((core->size < 10)? 2 : 3) + 2;
-    size += (core->size * core->size) * 2;
+    i = 0;
+    while (i < core->size) {
+        x = 0;
+        while (x < core->size) {
+            size += ((core->game->map[i][x] < 10)? 2 : 3);
+            x += 1;
+        }
+        i += 1;
+    }
 
     if ((info = malloc(sizeof(char) * size)) == NULL)
         return (NULL);
@@ -149,6 +161,11 @@ char *gameInfoMap(t_core *core) {
         i += 1;
     }
     my_strcat(info, ";");
+
+    put(core, my_nbrtostr(size));
+    put(core, "\n");
+    put(core, my_nbrtostr(my_strlen(info)));
+    put(core, "\n");
 
     return (info);
 }
@@ -179,34 +196,46 @@ void gameAction(t_core *core, int key, char *request) {
     int code, delta;
     char *tmp;
 
+    put(core, request);
+    put(core, "\n");
+
     delta = getMs() - core->start;
     if (delta >= 50) {
         int delta = updateMap(core, 1);
         if (delta != 0) {
+            put(core, "get gameInfoMap\n");
             tmp = gameInfoMap(core);
+            put(core, "send gameInfoMap\n");
             sendAll(core, tmp, my_strlen(tmp));
+            put(core, "sent gameInfoMap\n");
             free(tmp);
+            put(core, "free gameInfoMap\n");
         }
         core->start = getMs();
     }
 
-    if (request[0] == 'u') {
+    put(core, "after delta\n");
+
+    if (my_strcmp(request, "u") == 0) {
         code = a_playerMoveUp(core, key);
     }
-    if (request[0] == 'd') {
+    if (my_strcmp(request, "d") == 0) {
         code = a_playerMoveDown(core, key);
     }
-    if (request[0] == 'l') {
+    if (my_strcmp(request, "l") == 0) {
         code = a_playerMoveLeft(core, key);
     }
-    if (request[0] == 'r') {
+    if (my_strcmp(request, "r") == 0) {
         code = a_playerMoveRight(core, key);
     }
-    if (request[0] == 'b') {
+    if (my_strcmp(request, "b") == 0) {
         code = a_playerPlaceBomb(core, key);
     }
 
+    put(core, "after action\n");
+
     if (core->game->players[key] != NULL) {
+        put(core, (code) ? "OK\n" : "KO\n");
         if (code) {
             sendPayload(core->game->players[key]->socket, "OK", 2);
         } else {

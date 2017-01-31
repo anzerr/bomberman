@@ -7,9 +7,9 @@ obj.prototype = {
 		p: function(self, key, data) {
 			self.game._player[data[1]] = {
 				name: data[2],
-				dead: data[3],
-				x: data[4],
-				y: data[5]
+				dead: Number(data[3]),
+				x: Number(data[4]),
+				y: Number(data[5])
 			};
 			self.game.sendAll(JSON.stringify({
 				action: 'player',
