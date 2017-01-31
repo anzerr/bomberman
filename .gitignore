@@ -1,0 +1,5 @@
+.idea/
+client/node_modules
+server/softwar.log
+
+*.o

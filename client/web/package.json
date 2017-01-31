@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "ws": "latest",
+    "http": "latest",
+    "fs": "latest",
+    "serve-static": "latest",
+    "connect": "latest"
+  }
+}
