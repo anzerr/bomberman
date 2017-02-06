@@ -9,6 +9,66 @@
             height: 100%;
             overflow: hidden;
         }
+        .infoBlock {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            padding: 15% 0px;
+            text-align: center;
+            color: white;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            color: white;
+        }
+
+        #gameList {
+            float: left;
+            background: rgba(10, 10, 10, 0.5);
+            width: calc(50% - 100px);
+            margin: 50px;
+            height: calc(100% - 100px);
+        }
+
+        .createGameBox {
+            float: left;
+            width: 50%;
+            height: 100%;
+        }
+
+        #createGame {
+            cursor: pointer;
+            background: rgba(10, 200, 10, 0.7);
+            width: 50%;
+            font-size: 16px;
+            height: 32px;
+            margin: 0 auto;
+            line-height: 32px;
+            text-align: center  ;
+            margin-top: calc(50% - 16px);
+        }
+
+        .gameRoom {
+            cursor: pointer;
+            padding: 10px;
+            border: 1px black solid;
+        }
+
+        #canvas {
+            width: 360px;
+            height: 360px;
+            margin-left: calc(50% - 180px);
+            overflow: hidden;
+            margin-top: 50px;
+        }
     </style>
     <script>
         var draw = function() {
@@ -37,10 +97,58 @@
                     };
             }());
 
+            var toGet = function(obj) {
+                var str = "";
+                for (var key in obj) {
+                    if (str != "") {
+                        str += "&";
+                    }
+                    str += key + "=" + encodeURIComponent(obj[key]);
+                }
+                return (str);
+            };
+
+            var ajax = function(o, cb) {
+                var header = o.headers || {};
+                var xhr = new XMLHttpRequest();
+                xhr.open(o.method, o.url + ((typeof(o.data) === 'object' && o.method == 'GET')? '?'+ toGet(o.data) : ''), true);
+                for (var i in header) {
+                    xhr.setRequestHeader(i, header[i]);
+                }
+
+                xhr.onreadystatechange = function() {
+                    if(xhr.readyState === XMLHttpRequest.DONE) {
+                        var out = xhr.responseText;
+                        try {
+                            out = JSON.parse(out);
+                        } catch(e) {
+
+                        }
+
+                        if (xhr.status >= 200 && xhr.status <= 300) {
+                            cb(out)
+                        } else {
+                            cb(out);
+                        }
+                    }
+                };
+
+                if (o.timeout) {
+                    xhr.timeout = o.timeout;
+                }
+
+                if (typeof(o.data) === 'object' && o.method != 'GET') {
+                    xhr.setRequestHeader('Content-Type','application/json');
+                    xhr.send(JSON.stringify(o.data));
+                } else {
+                    xhr.send(o.data || '');
+                }
+            };
+
             var render = function() {
                 var canvas = document.getElementById('canvas');
-                canvas.width = document.body.clientWidth;
-                canvas.height = document.body.clientHeight;
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
 
                 this.canvasWidth  = canvas.width;
                 this.canvasHeight = canvas.height;
@@ -92,6 +200,10 @@
                     if (data.action == 'map') {
                         this._map = data.data;
                     }
+                    if (data.action == 'won') {
+                        document.getElementById('info').innerHTML = 'player ' + data.data + ' has won';
+                        document.getElementById('info').style.background = 'rgba(10, 10, 10, 0.5)';
+                    }
                 }
             };
 
@@ -109,8 +221,6 @@
                 ws.onmessage = function(evt) {
                     core.update(evt.data);
                 };
-                ws.send('map');
-                ws.send('player');
 
                 var button = {
                     38: 'up',
@@ -129,11 +239,68 @@
                     }, 300);
                 };
                 ping();*/
+                var menu = {
+                    loadLobby: function(cb) {
+                        ajax({
+                            method: 'GET',
+                            url: '/game'
+                        }, function(res) {
+                            var myNode = document.getElementById('gameList');
+                            while (myNode.firstChild) {
+                                myNode.removeChild(myNode.firstChild);
+                            }
+
+                            for (var i in res) {
+                                (function(i) {
+                                    var innerDiv = document.createElement('div');
+                                    innerDiv.className = 'gameRoom';
+                                    innerDiv.innerHTML = 'game "' + i + '" ' + res[i] + '/4';
+                                    innerDiv.addEventListener('mousedown', function(event) {
+                                        ws.send(i);
+                                        document.getElementById('overlay').style.display = 'none';
+                                        setTimeout(function() {
+                                            ws.send('map');
+                                            ws.send('player');
+                                        }, 50);
+                                    });
+                                    myNode.appendChild(innerDiv);
+                                })(i);
+                            }
+                            if (cb) {
+                                cb();
+                            }
+                        });
+                        return (this);
+                    },
+                    createGame: function(cb) {
+                        ajax({
+                            method: 'POST',
+                            url: '/game'
+                        }, function(res) {
+                            menu.loadLobby(cb);
+                        });
+                        return (this);
+                    }
+                };
+
+                menu.loadLobby();
+                document.getElementById('createGame').addEventListener('mousedown', function(event) {
+                    menu.createGame(function() {
+                        console.log('done');
+                    });
+                });
             }
         };
     </script>
 </head>
 <body onload="draw()">
-<canvas id="canvas" style="width:100%;height:100%"></canvas>
+    <div id="overlay">
+        <div id="gameList"></div>
+        <div class="createGameBox">
+            <div id="createGame">Create game server</div>
+        </div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="info" class="infoBlock"></div>
 </body>
 </html>

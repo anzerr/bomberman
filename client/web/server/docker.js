@@ -39,18 +39,31 @@ obj.prototype = {
 		});
 	},
 
-	build: function(cb) {
+	create: function(data, cd) {
+		var e = (process.platform == 'win32') ? this._env : null;
+		return (this.bash('docker run -d --name ' + data.id + 'bomb -p ' + data.port + ':980 server/bomberman:1.0.0', e, function() {
+			cd();
+		}, true));
+	},
+
+	build: function(build, cb) {
+		if (!build) {
+			return (cb());
+		}
+
 		var self = this, run = function() {
 			console.log(self._env);
-			return (self.bash('docker build -f ../../DockerFile -t server/bomberman ../../', (process.platform == 'win32') ? self._env : null, function() {
-
+			return (self.bash('docker build -f ../../DockerFile -t server/bomberman:1.0.0 ../../', (process.platform == 'win32') ? self._env : null, function() {
+				setTimeout(function() {
+					cb();
+				}, 1000);
 			}, true));
 		};
 
 		if (process.platform == 'win32') {
 			return (this.bash('./server/start.sh', null, function() {
 				run();
-			}, true));
+			}, false));
 		} else {
 			run();
 		}

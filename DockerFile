@@ -13,14 +13,14 @@ WORKDIR /usr/bomberman/
 RUN tr -d '\r'
 
 WORKDIR /usr/bomberman/lib/lib_src
-RUN make -re
+RUN make re
 
 RUN cp /usr/bomberman/lib/lib_src/libmy.a /usr/bomberman/server/libmy.a
 
 WORKDIR /usr/bomberman/server
-RUN ls -R
-RUN cat main.c
-RUN make -re
-RUN chmod 777 bomberman
+RUN make re
+RUN chmod 777 /usr/bomberman/server/bomberman
 
-CMD ['./bomberman']
+RUN ls -R /usr/bomberman/server/
+
+CMD ["/usr/bomberman/server/bomberman", "--port", "980", "-v"]

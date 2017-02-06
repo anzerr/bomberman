@@ -33,6 +33,12 @@ obj.prototype = {
 				action: 'map',
 				data: self.game._map
 			}));
+		},
+		e: function(self, key, data) {
+			self.game.sendAll(JSON.stringify({
+				action: 'won',
+				data: data[1]
+			}));
 		}
 	},
 

@@ -47,8 +47,10 @@ int createMap(int ***map, int size) {
 }
 
 int updateMap(t_core *core, int delta) {
-    int i, x, changes;
+    int i, x, changes, left, last;
+    char tmp[10];
     t_game *game;
+    t_client *player;
 
     i = 0;
     changes = 1;
@@ -72,6 +74,27 @@ int updateMap(t_core *core, int delta) {
         }
         i += 1;
     }
+    last = (left = (i = 0));
+    while (i < MAX_PLAYER) {
+        if (core->game->players[i] != NULL) {
+            player = core->game->players[i];
+            if (player->dead == 0) {
+                left += 1;
+                last = i;
+            }
+        }
+        i += 1;
+    }
+    if (left <= 1) {
+        my_memset(tmp, 0, 10);
+        my_strcat(tmp, "e,");
+        my_strcat(tmp, my_nbrtostr(last));
+        put(core, tmp);
+        sendAll(core, tmp, my_strlen(tmp));
+        core->running = 0;
+        changes = 0;
+    }
+
     return (changes);
 }
 
@@ -234,7 +257,7 @@ void gameAction(t_core *core, int key, char *request) {
 
     put(core, "after action\n");
 
-    if (core->game->players[key] != NULL) {
+    if (core->game->players[key] != NULL && 0) {
         put(core, (code) ? "OK\n" : "KO\n");
         if (code) {
             sendPayload(core->game->players[key]->socket, "OK", 2);

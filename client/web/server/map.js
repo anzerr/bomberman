@@ -1,7 +1,8 @@
 
 var game = require('./game.js');
 
-var obj = function() {
+var obj = function(config) {
+	this._config = config;
 	this._user = {};
 	this._client = {};
 	this._handle = new game(this);
@@ -10,9 +11,21 @@ var obj = function() {
 	}
 };
 obj.prototype = {
+	id: function() {
+		return (this._config.id);
+	},
+	slot: function() {
+		var c = 0;
+		for (var x in this._user) {
+			if (this._user[x]) {
+				c += 1;
+			}
+		}
+		return (c);
+	},
 	createClient: function(key) {
 		var self = this, s = require('net').Socket();
-		s.connect(980, '127.0.0.1');
+		s.connect(this._config.port, (process.platform == 'win32') ? '192.168.99.100' : '127.0.0.1');
 
 		s.on('data', function(d) {
 			self._handle.action(key, d.toString());
@@ -25,6 +38,15 @@ obj.prototype = {
 		s.on('close', function() {
 			console.log(key, 'is disconnected');
 			self._client[key] = null;
+			var free = 0;
+			for (var i in self._client) {
+				if (!self._client[i]) {
+					free += 1;
+				}
+			}
+			if (free == 4 && self._config.hook) {
+				self._config.hook();
+			}
 		});
 
 		s.on('error', function(e) {
