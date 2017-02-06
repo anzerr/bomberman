@@ -23,6 +23,6 @@ $(NAME):	$(OBJO)
 clean:
 	rm -f $(OBJO)
 fclean:		clean
-	rm -f $(NAME)
+	rm -f $(NAME) $(NAME).exe
 
 re:	fclean all

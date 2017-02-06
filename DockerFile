@@ -1,0 +1,24 @@
+FROM ubuntu
+
+COPY server /usr/bomberman/server
+COPY lib /usr/bomberman/lib
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		gcc-5 \
+		build-essential \
+	&& rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/bomberman/
+RUN tr -d '\r'
+
+WORKDIR /usr/bomberman/lib/lib_src
+RUN make -re
+
+RUN cp /usr/bomberman/lib/lib_src/libmy.a /usr/bomberman/server/libmy.a
+
+WORKDIR /usr/bomberman/server
+RUN make -re
+RUN chmod 777 bomberman
+
+CMD ['./bomberman']

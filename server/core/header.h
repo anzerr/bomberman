@@ -17,6 +17,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 #define MAX_PLAYER 4
 #define REQUEST_SIZE 1024
@@ -24,6 +25,11 @@
 struct s_client;
 struct s_core;
 struct s_game;
+
+typedef struct {
+  long tv_sec;
+  long tv_usec;
+} timeval;
 
 typedef struct s_list
 {
