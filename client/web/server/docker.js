@@ -24,13 +24,13 @@ obj.prototype = {
 
 		b.stdout.on('data', function(data) {
 			if (verbose) {
-				console.log('stdout:', data.toString());
+				console.log(data.toString());
 			}
 		});
 
 		b.stderr.on('data', function(data) {
 			if (verbose) {
-				console.log('stderr:', data.toString());
+				console.log(data.toString());
 			}
 		});
 

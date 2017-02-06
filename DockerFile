@@ -18,6 +18,8 @@ RUN make -re
 RUN cp /usr/bomberman/lib/lib_src/libmy.a /usr/bomberman/server/libmy.a
 
 WORKDIR /usr/bomberman/server
+RUN ls -R
+RUN cat main.c
 RUN make -re
 RUN chmod 777 bomberman
 

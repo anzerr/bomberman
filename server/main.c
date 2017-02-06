@@ -65,7 +65,7 @@ int listenClient(t_core *core) {
         if (FD_ISSET(core->sockfd, &readfds)) {
 	        put(core, "accept socket\n");
 	        c = sizeof(struct sockaddr_in);
-            if ((soc    ket = accept(core->sockfd, (struct sockaddr *)&address,  (socklen_t *)&c)) < 0) {
+            if ((socket = accept(core->sockfd, (struct sockaddr *)&address, (socklen_t *)&c)) < 0) {
 	            put(core, "client connected failed to accept connection\n");
                 return (-1);
             }
