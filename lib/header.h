@@ -3,6 +3,9 @@
 #define __HEADER_LIB__
 
 #include <stdlib.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 typedef struct s_list
 {

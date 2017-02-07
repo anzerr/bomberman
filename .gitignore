@@ -6,3 +6,4 @@ client/macro/node_modules/*
 server/debug.log
 
 *.o
+*.exe

@@ -93,6 +93,7 @@ int listenClient(t_core *core) {
             }
             i += 1;
         }
+        put(core, (!core->running)? "game done exit\n" : "loop");
     }
 
     return (0);
